@@ -8,38 +8,35 @@ package main
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 /*
-"zip_code": "60601",
-"week_number": "29",
-"week_start": "2022-07-17T00:00:00.000",
-"week_end": "2022-07-23T00:00:00.000",
-"cases_weekly": "27",
-"cases_cumulative": "4933",
-"case_rate_weekly": "184",
-"case_rate_cumulative": "33615",
-"tests_weekly": "318",
-"tests_cumulative": "97852",
-"test_rate_weekly": "2167",
-"test_rate_cumulative": "666793.9",
-"percent_tested_positive_weekly": "0.129",
-"percent_tested_positive_cumulative": "0.06",
-"deaths_weekly": "0",
-"deaths_cumulative": "13",
-"death_rate_weekly": "0",
-"death_rate_cumulative": "88.6",
-"population": "14675",
-"row_id": "60601-2022-29",
-"zip_code_location": {
-  "type": "Point",
-  "coordinates": [
-	-87.622844,
-	41.886262
-  ]
-},
-":@computed_region_rpca_8um6": "42",
-":@computed_region_vrxf_vc4k": "38",
-":@computed_region_6mkv_f3dw": "14309",
-":@computed_region_bdys_3d7i": "580",
-":@computed_region_43wa_7qmu": "36"
+   "community_area": "1",
+    "community_area_name": "Rogers Park",
+    "birth_rate": "16.4",
+    "general_fertility_rate": "62",
+    "low_birth_weight": "11",
+    "prenatal_care_beginning_in_first_trimester": "73",
+    "preterm_births": "11.2",
+    "teen_birth_rate": "40.8",
+    "assault_homicide": "7.7",
+    "breast_cancer_in_females": "23.3",
+    "cancer_all_sites": "176.9",
+    "colorectal_cancer": "25.3",
+    "diabetes_related": "77.1",
+    "firearm_related": "5.2",
+    "infant_mortality_rate": "6.4",
+    "lung_cancer": "36.7",
+    "prostate_cancer_in_males": "21.7",
+    "stroke_cerebrovascular_disease": "33.7",
+    "childhood_blood_lead_level_screening": "364.7",
+    "childhood_lead_poisoning": "0.5",
+    "gonorrhea_in_females": "322.5",
+    "gonorrhea_in_males": "423.3",
+    "tuberculosis": "11.4",
+    "below_poverty_level": "22.7",
+    "crowded_housing": "7.9",
+    "dependency": "28.8",
+    "no_high_school_diploma": "18.1",
+    "per_capita_income": "23714",
+    "unemployment": "7.5"
 */
 ////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -57,14 +54,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type CovidDataJsonRecords []struct {
-	Zip_code                       string `json:"zip_code"`
-	Week_number                    string `json:"week_number"`
-	Week_end                       string `json:"week_end"`
-	Cases_weekly                   string `json:"cases_weekly"`
-	Tests_weekly                   string `json:"tests_weekly"`
-	Deaths_weekly                  string `json:"deaths_weekly"`
-	Percent_tested_positive_weekly string `json:"percent_tested_positive_weekly"`
+type UnemploymentJsonRecords []struct {
+	Community_area string `json:"community_area"`
+	Unemployment   string `json:"unemployment"`
 }
 
 func main() {
@@ -94,7 +86,7 @@ func main() {
 	for {
 		// build and fine-tune functions to pull data from different data sources
 		// This is a code snippet to show you how to pull data from different data sources.
-		GetCovidData(db)
+		GetUnemploymentData(db)
 
 		// Pull the data once a day
 		// You might need to pull Taxi Trips and COVID data on daily basis
@@ -104,7 +96,7 @@ func main() {
 
 }
 
-func GetCovidData(db *sql.DB) {
+func GetUnemploymentData(db *sql.DB) {
 
 	// This function is NOT complete
 	// It provides code-snippets for the data source: https://data.cityofchicago.org/Transportation/Taxi-Trips/wrvz-psew
@@ -114,28 +106,23 @@ func GetCovidData(db *sql.DB) {
 	// 1. https://data.cityofchicago.org/Transportation/Taxi-Trips/wrvz-psew
 	// 2. https://data.cityofchicago.org/Transportation/Transportation-Network-Providers-Trips/m6dm-c72p
 
-	fmt.Println("GetCovidData: Grabbing COVID Data")
+	fmt.Println("GetUnemploymentData: Grabbing Unemployment Data")
 
 	// Get your geocoder.ApiKey from here :
 	// https://developers.google.com/maps/documentation/geocoding/get-api-key?authuser=2
 
 	geocoder.ApiKey = "AIzaSyB-JwmMaEwb3yEomj66SnNlkA5GyKcRfWU"
 
-	drop_table := `drop table if exists covid_data`
+	drop_table := `drop table if exists unemployment_data`
 	_, err := db.Exec(drop_table)
 	if err != nil {
 		panic(err)
 	}
 
-	create_table := `CREATE TABLE IF NOT EXISTS covid_data (
+	create_table := `CREATE TABLE IF NOT EXISTS unemployment_data (
 						"id"   SERIAL , 
-						"zip_code" VARCHAR(255), 
-						"week_number" INT,
-						"week_end" DATE,
-						"cases_weekly" FLOAT,
-						"tests_weekly" FLOAT, 
-						"deaths_weekly" FLOAT, 
-						"percent_tested_positive_weekly" FLOAT,
+						"community_area" VARCHAR(255), 
+						"unemployment_rate" FLOAT,
 						PRIMARY KEY ("id") 
 					);`
 
@@ -147,7 +134,7 @@ func GetCovidData(db *sql.DB) {
 	// While doing unit-testing keep the limit value to 500
 	// later you could change it to 1000, 2000, 10,000, etc.
 	fmt.Println("Grabbing data from Chicago Data...")
-	var url = "https://data.cityofchicago.org/resource/yhhz-zm2v.json"
+	var url = "https://data.cityofchicago.org/resource/iqnk-2tcu.json"
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -155,68 +142,38 @@ func GetCovidData(db *sql.DB) {
 	}
 	fmt.Println("Starting JSON unmarshalling...")
 	body, _ := ioutil.ReadAll(res.Body)
-	var covid_list CovidDataJsonRecords
-	json.Unmarshal(body, &covid_list)
+	var unemployment_list UnemploymentJsonRecords
+	json.Unmarshal(body, &unemployment_list)
 	fmt.Println("JSON unmarshalling done...")
 	fmt.Println("Now unpacking JSON and inserting into db... ")
-	for i := 0; i < len(covid_list); i++ {
+	for i := 0; i < len(unemployment_list); i++ {
 
 		// We will execute definsive coding to check for messy/dirty/missing data values
 		// Any record that has messy/dirty/missing data we don't enter it in the data lake/table
 
-		zip_code := covid_list[i].Zip_code
-		if zip_code == "" {
+		community_area := unemployment_list[i].Community_area
+		if community_area == "" {
 			continue
 		}
 
-		week_number := covid_list[i].Week_number
-		if week_number == "" {
+		unemployment_rate := unemployment_list[i].Unemployment
+		if unemployment_rate == "" {
 			continue
 		}
 
-		week_end := covid_list[i].Week_end
-		if week_end == "" {
-			continue
-		}
-
-		cases_weekly := covid_list[i].Cases_weekly
-		if cases_weekly == "" {
-			continue
-		}
-
-		tests_weekly := covid_list[i].Tests_weekly
-		if tests_weekly == "" {
-			continue
-		}
-
-		deaths_weekly := covid_list[i].Deaths_weekly
-		if deaths_weekly == "" {
-			continue
-		}
-
-		percent_tested_positive_weekly := covid_list[i].Percent_tested_positive_weekly
-		if percent_tested_positive_weekly == "" {
-			continue
-		}
-
-		sql := `INSERT INTO covid_data ("zip_code", "week_number", "week_end", "cases_weekly", "tests_weekly", "deaths_weekly", "percent_tested_positive_weekly"
-			) values($1, $2, $3, $4, $5, $6, $7)`
+		sql := `INSERT INTO unemployment_data ("community_area", "unemployment_rate"
+			) values($1, $2)`
 
 		_, err = db.Exec(
 			sql,
-			zip_code,
-			week_number,
-			week_end,
-			cases_weekly,
-			tests_weekly,
-			deaths_weekly,
-			percent_tested_positive_weekly)
+			community_area,
+			unemployment_rate)
 
 		if err != nil {
 			panic(err)
 		}
 
 	}
-	fmt.Println("== Done with Covid Data ==")
+	fmt.Println("== Done with Unemployment Data ==")
 
 }
