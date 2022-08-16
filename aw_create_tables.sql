@@ -3,7 +3,7 @@ CREATE DATABASE chicago_bi;
 
 DROP TABLE IF EXISTS MSDSCourseCatalog;
 
-\c msds;
+\c chicago_bi;
 
 /*CREATE TABLE MSDSCourseCatalog (
     CID VARCHAR(100),

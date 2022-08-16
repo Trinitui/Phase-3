@@ -51,10 +51,10 @@ type CCVIJsonRecords []struct {
 func main() {
 	fmt.Println("Starting CCVI MicroService!")
 	// Establish connection to Postgres Database
-	db_connection := "user=postgres dbname=chicago_bi password=root host=localhost sslmode=disable"
+	//db_connection := "user=postgres dbname=chicago_bi password=root host=localhost sslmode=disable"
 
 	// Docker image for the microservice - uncomment when deploy
-	//db_connection := "user=postgres dbname=chicago_business_intelligence password=root host=host.docker.internal sslmode=disable"
+	db_connection := "user=postgres dbname=chicago_bi password=root host=8.8.8.8 sslmode=disable"
 
 	db, err := sql.Open("postgres", db_connection)
 	if err != nil {
@@ -67,6 +67,7 @@ func main() {
 		fmt.Println("Couldn't Connect to database")
 		panic(err)
 	}
+	fmt.Println("Done with DB ping...")
 
 	// Spin in a loop and pull data from the city of chicago data portal
 	// Once every hour, day, week, etc.
@@ -76,7 +77,7 @@ func main() {
 		// build and fine-tune functions to pull data from different data sources
 		// This is a code snippet to show you how to pull data from different data sources.
 		GetCCVI(db)
-
+		fmt.Println("Done!")
 		// Pull the data once a day
 		// You might need to pull Taxi Trips and COVID data on daily basis
 		// but not the unemployment dataset becasue its dataset doesn't change every day
