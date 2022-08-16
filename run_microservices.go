@@ -148,7 +148,7 @@ func GetCCVI(db *sql.DB) {
 	// While doing unit-testing keep the limit value to 500
 	// later you could change it to 1000, 2000, 10,000, etc.
 	fmt.Println("Grabbing data from Chicago Data...")
-	var url = "https://data.cityofchicago.org/resource/xhc6-88s9.json?$limit=500"
+	var url = "https://data.cityofchicago.org/resource/xhc6-88s9.json"
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -471,7 +471,7 @@ func GetTaxiTrips(db *sql.DB) {
 	// While doing unit-testing keep the limit value to 500
 	// later you could change it to 1000, 2000, 10,000, etc.
 	fmt.Println("Grabbing data from Chicago Data...")
-	var url = "https://data.cityofchicago.org/resource/wrvz-psew.json?$limit=500"
+	var url = "https://data.cityofchicago.org/resource/wrvz-psew.json"
 
 	res, err := http.Get(url)
 	if err != nil {
@@ -633,7 +633,7 @@ func GetTransportTrips(db *sql.DB) {
 	// While doing unit-testing keep the limit value to 500
 	// later you could change it to 1000, 2000, 10,000, etc.
 	fmt.Println("Grabbing data from Chicago Data...")
-	var url = "https://data.cityofchicago.org/resource/m6dm-c72p.json?$limit=500"
+	var url = "https://data.cityofchicago.org/resource/m6dm-c72p.json"
 
 	res, err := http.Get(url)
 	if err != nil {
