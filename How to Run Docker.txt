@@ -3,3 +3,6 @@ docker exec -it postgres psql -U postgres
 
 To get a sql file into docker:
 docker exec -i postgres psql -U postgres < aw_create_tables.sql
+
+To get the microservices running:
+go run run_microservices.go
